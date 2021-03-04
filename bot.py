@@ -69,7 +69,6 @@ def got_message(message):
 
     # check for spam
     if msg_author in message_times:
-        print(message_times, msg_author)
         message_times[msg_author] = [
             x for x in message_times[msg_author] if (
                 time.time() - x) < SPAM_TIME]
@@ -77,14 +76,12 @@ def got_message(message):
         msg_cnt = len(message_times[msg_author])
         if msg_cnt >= SPAM_MAX:
             # remove from group
-            print("kick!")
             try:
                 remove_and_remember(message.chat, msg_author)
             except:
                 pass
         elif msg_cnt >= SPAM_WARN:
             # warn for spam
-            print("warn!")
             driver.chat_send_message(msg.chat_id, "די להספים! " +
                                      f"({msg_cnt}/{SPAM_MAX})")
     else:
@@ -149,8 +146,11 @@ while True:
         for x in memory["add_back"]:
             if x[0] < time.time():
                 # add back
-                print("need to add back", x)
-                driver.add_participant_group(x[1], x[2])
+                print("add back", x)
+                try:
+                    driver.add_participant_group(x[1], x[2])
+                except:
+                    pass
                 changed_add_back = True
             else:
                 new_add_back.append(x)
