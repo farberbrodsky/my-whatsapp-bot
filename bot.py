@@ -130,6 +130,11 @@ def got_message(message):
                 img_base_64, msg.chat_id, {})
         else:
             driver.chat_send_message(msg.chat_id, "אין פה תמונה")
+    elif command_first_word == "להוציא":
+        # remove the next word
+        remove_id = command_words[1][1:] + "@c.us"
+        print("removing", remove_id)
+        remove_and_remember(message.chat, remove_id)
     elif command_first_word == "מידע":
         driver.chat_send_message(msg.chat_id, """היי אני הבוט של מישה!
 הפקודות שלי הן:
