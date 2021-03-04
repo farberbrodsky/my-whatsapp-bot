@@ -139,7 +139,6 @@ def got_message(message):
             driver.chat_send_message(msg.chat_id, "אין פה תמונה")
     elif command_first_word == "להוציא":
         remove_id = command_words[1][1:] + "@c.us"
-        print("removing", remove_id)
         # save a tuple of timestamp and who wants to remove remove_id
         # in c_st["remove_times"][remove_id]
         if remove_id in c_st["remove_times"]:
