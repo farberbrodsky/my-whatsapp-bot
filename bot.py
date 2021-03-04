@@ -13,6 +13,7 @@ from openwa import WhatsAPIDriver
 SPAM_TIME = 30
 SPAM_WARN = 16
 SPAM_MAX = 20
+RETURN_TIME = 60  # how long can someone be out, in seconds
 
 
 driver = WhatsAPIDriver(
@@ -52,6 +53,14 @@ def draw_text(img, text, top=True):
 message_times = {}
 
 
+def remove_and_remember(chat, author_id):
+    if "add_back" not in memory:
+        memory["add_back"] = []
+    driver.remove_participant_group(chat.id, author_id)
+    memory["add_back"].append((time.time() + RETURN_TIME, chat.id, author_id))
+    save_memory()
+
+
 def got_message(message):
     # log who sent this
     global memory
@@ -70,7 +79,7 @@ def got_message(message):
             # remove from group
             print("kick!")
             try:
-                message.chat.remove_participant_group(msg_author)
+                remove_and_remember(message.chat, msg_author)
             except:
                 pass
         elif msg_cnt >= SPAM_WARN:
@@ -133,6 +142,23 @@ def got_message(message):
 
 while True:
     unread_messages = driver.get_unread()
+    # check if we need to return someone
+    new_add_back = []
+    changed_add_back = False
+    if "add_back" in memory:
+        for x in memory["add_back"]:
+            if x[0] < time.time():
+                # add back
+                print("need to add back", x)
+                driver.add_participant_group(x[1], x[2])
+                changed_add_back = True
+            else:
+                new_add_back.append(x)
+
+    if changed_add_back:
+        memory["add_back"] = new_add_back
+        save_memory()
+
     for message in unread_messages:
         try:
             got_message(message)
