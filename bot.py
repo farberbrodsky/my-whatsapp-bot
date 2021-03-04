@@ -50,9 +50,6 @@ def draw_text(img, text, top=True):
                 "mt" if top else "mb"), direction="rtl")
 
 
-message_times = {}
-
-
 def remove_and_remember(chat, author_id):
     if "add_back" not in memory:
         memory["add_back"] = []
@@ -61,19 +58,27 @@ def remove_and_remember(chat, author_id):
     save_memory()
 
 
+chat_state = {}
+
+
 def got_message(message):
     # log who sent this
-    global memory
+    global memory, chat_state
     msg = message.messages[0]
     msg_author = msg.sender.id
 
+    if message.chat.id not in chat_state:
+        chat_state[message.chat.id] = {"message_times": {}}
+
+    c_st = chat_state[message.chat.id]
+
     # check for spam
-    if msg_author in message_times:
-        message_times[msg_author] = [
-            x for x in message_times[msg_author] if (
+    if msg_author in c_st["message_times"]:
+        c_st["message_times"][msg_author] = [
+            x for x in c_st["message_times"][msg_author] if (
                 time.time() - x) < SPAM_TIME]
-        message_times[msg_author] += [time.time()]
-        msg_cnt = len(message_times[msg_author])
+        c_st["message_times"][msg_author] += [time.time()]
+        msg_cnt = len(c_st["message_times"][msg_author])
         if msg_cnt >= SPAM_MAX:
             # remove from group
             try:
@@ -85,7 +90,7 @@ def got_message(message):
             driver.chat_send_message(msg.chat_id, "די להספים! " +
                                      f"({msg_cnt}/{SPAM_MAX})")
     else:
-        message_times[msg_author] = [time.time()]
+        c_st["message_times"][msg_author] = [time.time()]
 
     if isinstance(msg, MediaMessage):
         command = msg.caption
