@@ -14,6 +14,8 @@ SPAM_TIME = 30
 SPAM_WARN = 16
 SPAM_MAX = 20
 RETURN_TIME = 60  # how long can someone be out, in seconds
+REMOVE_CONSENSUS = 5  # requires n people to agree for removal
+REMOVE_VALIDITY_TIME = 120  # asking for a remove is valid for 2 minute
 
 
 driver = WhatsAPIDriver(
@@ -68,7 +70,7 @@ def got_message(message):
     msg_author = msg.sender.id
 
     if message.chat.id not in chat_state:
-        chat_state[message.chat.id] = {"message_times": {}}
+        chat_state[message.chat.id] = {"message_times": {}, "remove_times": {}}
 
     c_st = chat_state[message.chat.id]
 
@@ -136,10 +138,38 @@ def got_message(message):
         else:
             driver.chat_send_message(msg.chat_id, "אין פה תמונה")
     elif command_first_word == "להוציא":
-        # remove the next word
         remove_id = command_words[1][1:] + "@c.us"
         print("removing", remove_id)
-        remove_and_remember(message.chat, remove_id)
+        # save a tuple of timestamp and who wants to remove remove_id
+        # in c_st["remove_times"][remove_id]
+        if remove_id in c_st["remove_times"]:
+            # remove historic data
+            c_st["remove_times"][remove_id] = [
+                x for x in c_st["remove_times"][remove_id] if (
+                    time.time() - x[0]) < REMOVE_VALIDITY_TIME]
+
+            # check for double-voting
+            for x in c_st["remove_times"][remove_id]:
+                if x[1] == msg_author:
+                    driver.chat_send_message(msg.chat_id, "הצבעת פעמיים")
+                    return
+            # add this vote
+            c_st["remove_times"][remove_id] += [(time.time(), msg_author)]
+            rm_cnt = len(c_st["remove_times"][remove_id])
+            driver.chat_send_message(msg.chat_id,
+                                     f"הוצאה {rm_cnt}/{REMOVE_CONSENSUS}")
+            if rm_cnt >= REMOVE_CONSENSUS:
+                # remove from group
+                try:
+                    del c_st["remove_times"][remove_id]
+                    remove_and_remember(message.chat, remove_id)
+                except:
+                    pass
+        else:
+            # add first vote
+            c_st["remove_times"][remove_id] = [(time.time(), msg_author)]
+            driver.chat_send_message(msg.chat_id,
+                                     f"הוצאה 1/{REMOVE_CONSENSUS}")
     elif command_first_word == "מידע":
         driver.chat_send_message(msg.chat_id, """היי אני הבוט של מישה!
 הפקודות שלי הן:
