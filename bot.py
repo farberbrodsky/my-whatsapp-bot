@@ -11,8 +11,8 @@ from openwa.objects.message import Message, MediaMessage
 from openwa.objects.chat import Chat
 from openwa import WhatsAPIDriver
 SPAM_TIME = 30
-SPAM_WARN = 5
-SPAM_MAX = 10
+SPAM_WARN = 16
+SPAM_MAX = 20
 
 
 driver = WhatsAPIDriver(
