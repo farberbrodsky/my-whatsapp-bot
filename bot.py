@@ -15,7 +15,7 @@ SPAM_WARN = 16
 SPAM_MAX = 20
 RETURN_TIME = 60  # how long can someone be out, in seconds
 REMOVE_CONSENSUS = 5  # requires n people to agree for removal
-REMOVE_VALIDITY_TIME = 120  # asking for a remove is valid for 2 minute
+REMOVE_VALIDITY_TIME = 30 * 60  # asking for a remove is valid for 30 minutes
 
 
 driver = WhatsAPIDriver(
