@@ -21,7 +21,7 @@ REMOVE_VALIDITY_TIME = 30 * 60  # asking for a remove is valid for 30 minutes
 driver = WhatsAPIDriver(
     client=environ["CLIENT"],
     profile=environ["PROFILE"],
-    headless=False)
+    headless=True)
 driver.wait_for_login()
 time.sleep(1)
 print("Bot started")
