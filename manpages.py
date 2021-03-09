@@ -92,6 +92,3 @@ def whatsapp_encoding(lines):
         else:
             result += " " + line
     return result
-
-print(whatsapp_encoding(read_manpage("fdopen")))
-#print("".join(read_manpage("fdopen")))

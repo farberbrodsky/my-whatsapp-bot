@@ -170,7 +170,7 @@ def got_message(message):
             c_st["remove_times"][remove_id] = [(time.time(), msg_author)]
             driver.chat_send_message(msg.chat_id,
                                      f"הוצאה 1/{REMOVE_CONSENSUS}")
-    elif command.first_word == "man":
+    elif command_first_word == "man":
         if len(command_words) == 3:
             section = command_words[1]
             manpage_searched = command_words[2]
