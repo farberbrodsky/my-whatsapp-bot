@@ -3,6 +3,7 @@ import io
 import time
 import json
 import sys
+import manpages
 from datetime import datetime
 from os import environ
 from PIL import Image, ImageFont, ImageDraw
@@ -169,6 +170,16 @@ def got_message(message):
             c_st["remove_times"][remove_id] = [(time.time(), msg_author)]
             driver.chat_send_message(msg.chat_id,
                                      f"הוצאה 1/{REMOVE_CONSENSUS}")
+    elif command.first_word == "man":
+        if len(command_words) == 3:
+            section = command_words[1]
+            manpage_searched = command_words[2]
+            page = manpages.read_manpage(manpage_searched, section)
+        else:
+            manpage_searched = command_words[1]
+            page = manpages.read_manpage(manpage_searched)
+
+        driver.chat_send_message(msg.chat_id, manpages.whatsapp_encoding(page))
     elif command_first_word == "מידע":
         driver.chat_send_message(msg.chat_id, """היי אני הבוט של מישה!
 הפקודות שלי הן:
